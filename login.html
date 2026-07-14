@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrar — Jaque Música</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="styles/auth.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="auth-body">
+<div class="auth-card">
+  <div class="auth-brand">
+    <div class="brand-mark">J</div>
+    <h1>Jaque Música</h1>
+    <p>Gestão de aulas particulares</p>
+  </div>
+
+  <div class="auth-tabs">
+    <button type="button" class="auth-tab active" data-tab="login">Entrar</button>
+    <button type="button" class="auth-tab" data-tab="signup">Criar conta</button>
+    <button type="button" class="auth-tab" data-tab="forgot">Esqueci a senha</button>
+  </div>
+
+  <div id="auth-msg" class="auth-msg"></div>
+
+  <!-- LOGIN -->
+  <form id="form-login" class="auth-panel active" data-panel="login">
+    <div class="field"><label>E-mail</label><input type="email" id="login-email" required autocomplete="email"></div>
+    <div class="field"><label>Senha</label><input type="password" id="login-password" required autocomplete="current-password"></div>
+    <button type="submit" class="btn btn-primary auth-submit">Entrar</button>
+  </form>
+
+  <!-- CADASTRO -->
+  <form id="form-signup" class="auth-panel" data-panel="signup">
+    <div class="field"><label>Nome</label><input type="text" id="signup-name" required autocomplete="name"></div>
+    <div class="field"><label>E-mail</label><input type="email" id="signup-email" required autocomplete="email"></div>
+    <div class="field"><label>Senha</label><input type="password" id="signup-password" required minlength="6" autocomplete="new-password"></div>
+    <div class="hint" style="margin:-6px 0 14px;">Mínimo de 6 caracteres.</div>
+    <button type="submit" class="btn btn-primary auth-submit">Criar conta</button>
+  </form>
+
+  <!-- ESQUECI A SENHA -->
+  <form id="form-forgot" class="auth-panel" data-panel="forgot">
+    <div class="field"><label>E-mail</label><input type="email" id="forgot-email" required autocomplete="email"></div>
+    <div class="hint" style="margin:-6px 0 14px;">Vamos enviar um link para você redefinir sua senha.</div>
+    <button type="submit" class="btn btn-primary auth-submit">Enviar link</button>
+  </form>
+
+  <div class="auth-foot" id="auth-foot-login">Ainda não tem conta? <a data-tab-link="signup">Criar conta</a></div>
+</div>
+
+<script type="module" src="auth.js"></script>
+</body>
+</html>
