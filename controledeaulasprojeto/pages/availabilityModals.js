@@ -38,10 +38,10 @@ export function openAvailabilityModal(editId){
       <form data-form="availability" data-id="${editing?editId:''}">
         <div class="field"><label>Dia da semana *</label><select id="a_weekday" required>${dowOpts}</select></div>
         <div class="field-row">
-          <div class="field"><label>Horário inicial *</label><select id="a_start" required>${timeOptions(editing?editing.startTime:'08:00')}</select></div>
-          <div class="field"><label>Horário final *</label><select id="a_end" required>${timeOptions(editing?editing.endTime:'18:00')}</select></div>
+          <div class="field"><label>Horário *</label><select id="a_start" required>${timeOptions(editing?editing.startTime:'19:00')}</select></div>
+          <div class="field"><label>Duração da aula *</label><select id="a_duration" required>${durationOptions(editing?editing.lessonDuration:50)}</select></div>
         </div>
-        <div class="field"><label>Duração da aula *</label><select id="a_duration" required>${durationOptions(editing?editing.lessonDuration:50)}</select></div>
+        <div class="hint" style="margin:-6px 0 14px;">Isto cria um único horário fixo (ex.: Segunda às 19h). Pra oferecer mais horários no mesmo dia, adicione outro depois (ex.: Segunda às 20h).</div>
         <div class="modal-foot">
           <button type="button" class="btn btn-ghost" data-action="close-modal">Cancelar</button>
           <button type="submit" class="btn btn-primary">${editing?'Salvar':'Adicionar'}</button>
@@ -57,13 +57,19 @@ export function deleteAvailability(id){
   dbDeleteAvailability(id).then(()=>{ render(); showToast('Horário excluído.'); });
 }
 
+function addMinutesToTime(time, minutes){
+  const [h,m] = time.split(':').map(Number);
+  const total = h*60+m+minutes;
+  const hh = String(Math.floor((total%(24*60))/60)).padStart(2,'0');
+  const mm = String(total%60).padStart(2,'0');
+  return `${hh}:${mm}`;
+}
+
 export async function handleAvailabilitySubmit(editId){
   const weekday = Number(document.getElementById('a_weekday').value);
   const startTime = document.getElementById('a_start').value;
-  const endTime = document.getElementById('a_end').value;
   const lessonDuration = Number(document.getElementById('a_duration').value)||50;
-
-  if(endTime <= startTime){ showToast('O horário final precisa ser depois do horário inicial.'); return; }
+  const endTime = addMinutesToTime(startTime, lessonDuration);
 
   if(editId){
     const rule = store.availability.find(a=>a.id===editId); if(!rule) return;

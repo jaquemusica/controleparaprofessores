@@ -40,8 +40,8 @@ export function viewDisponibilidade(){
           <div class="row-item">
             <div class="avatar">${ICONS.clock}</div>
             <div class="row-main">
-              <div class="name">${DOWS[r.weekday]}</div>
-              <div class="sub">${r.startTime} às ${r.endTime} · aulas de ${r.lessonDuration} min</div>
+              <div class="name">${DOWS[r.weekday]} às ${r.startTime}</div>
+              <div class="sub">aula de ${r.lessonDuration} min</div>
             </div>
             <div class="row-actions">
               <button class="btn btn-ghost btn-icon" title="Editar" data-action="edit-availability" data-id="${r.id}">${ICONS.edit}</button>
