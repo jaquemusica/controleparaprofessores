@@ -6,7 +6,7 @@ import { store } from './utils/store.js';
 import { render } from './ui/render.js';
 import { loadAll } from './services/dataLoader.js';
 import { todayStr, startOfWeek, addDays, escapeHtml } from './utils/dom.js';
-import { getSession, getProfile, onAuthStateChange, signOut } from './services/authService.js';
+import { getSession, getProfile, updateProfile, onAuthStateChange, signOut } from './services/authService.js';
 import {
   openStudentModal, deleteStudent,
   openPackageModal, deletePackage, markPaid,
@@ -66,7 +66,11 @@ document.body.addEventListener('click', (e)=>{
   else if(a==='logout'){ signOut().then(()=>{ window.location.href='login.html'; }); }
   else if(t.classList.contains('modal-overlay') || a==='close-modal-bg'){ if(e.target===t) closeModal(); }
 });
-document.body.addEventListener('submit', handleModalSubmit);
+document.body.addEventListener('submit', (e)=>{
+  const form = e.target.closest('form[data-form="perfil"]');
+  if(form){ e.preventDefault(); handlePerfilSubmit(); return; }
+  handleModalSubmit(e);
+});
 document.body.addEventListener('change',(e)=>{
   const t=e.target.closest('[data-action]'); if(!t) return;
   const a=t.dataset.action;
@@ -81,6 +85,22 @@ document.body.addEventListener('input',(e)=>{
     setTimeout(()=>{ const el=document.querySelector('[data-action="student-search"]'); if(el){ el.focus(); el.selectionStart=el.selectionEnd=el.value.length; } },0);
   }
 });
+
+/* ============================ PERFIL ============================ */
+async function handlePerfilSubmit(){
+  const name = document.getElementById('pf_name').value.trim();
+  const tagline = document.getElementById('pf_tagline').value.trim();
+  if(!name || !tagline) return;
+  try{
+    await updateProfile(store.session.user.id, { name, tagline });
+    store.profile = { ...store.profile, name, tagline };
+    render();
+    showToast('Perfil atualizado.');
+  }catch(e){
+    console.error(e);
+    showToast('Não foi possível salvar: ' + (e.message||'tente novamente.'));
+  }
+}
 
 /* ============================ ASSINATURA ============================ */
 function renderBlocked(){

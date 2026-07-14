@@ -131,6 +131,15 @@ create policy profiles_update_own on public.profiles for update using (auth.uid(
 -- não existe policy de insert em profiles: a linha é criada apenas pelo
 -- trigger handle_new_user (security definer), nunca pelo cliente.
 
+-- RLS por si só não dá acesso: o role "authenticated" também precisa
+-- do GRANT base na tabela (senão o PostgREST responde 403 antes mesmo
+-- de avaliar as policies). Alguns projetos Supabase não aplicam esse
+-- grant automaticamente em tabelas criadas via SQL Editor.
+grant select, insert, update, delete on public.students to authenticated;
+grant select, insert, update, delete on public.packages to authenticated;
+grant select, insert, update, delete on public.lessons  to authenticated;
+grant select, update on public.profiles to authenticated;
+
 
 -- ============================================================
 -- ETAPA 3 — Disponibilidade
@@ -161,6 +170,7 @@ create policy availability_select_own on public.availability for select using (a
 create policy availability_insert_own on public.availability for insert with check (auth.uid() = user_id);
 create policy availability_update_own on public.availability for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy availability_delete_own on public.availability for delete using (auth.uid() = user_id);
+grant select, insert, update, delete on public.availability to authenticated;
 
 
 -- ============================================================
@@ -191,6 +201,7 @@ drop policy if exists booking_requests_select_own on public.booking_requests;
 drop policy if exists booking_requests_update_own on public.booking_requests;
 create policy booking_requests_select_own on public.booking_requests for select using (auth.uid() = user_id);
 create policy booking_requests_update_own on public.booking_requests for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+grant select, update on public.booking_requests to authenticated;
 -- sem policy de insert/delete para authenticated/anon: a única forma de
 -- criar uma solicitação é pela função create_booking_request abaixo.
 
@@ -321,6 +332,7 @@ alter table public.subscriptions enable row level security;
 drop policy if exists subscriptions_select_own on public.subscriptions;
 create policy subscriptions_select_own on public.subscriptions for select using (auth.uid() = user_id);
 -- sem policy de insert/update/delete: só a service role (Edge Functions) escreve aqui.
+grant select on public.subscriptions to authenticated;
 
 -- Estende o trigger de cadastro (Etapa 2) para também criar a
 -- linha de assinatura (status 'pending' = ainda não assinou).
@@ -358,3 +370,12 @@ end;
 $$;
 -- (o trigger on_auth_user_created da Etapa 2 continua valendo, só
 -- trocamos a função que ele chama)
+
+
+-- ============================================================
+-- ETAPA 7 — Perfil editável (nome + assunto das aulas)
+-- Mostrado no canto superior esquerdo do sistema, no lugar do
+-- texto fixo "Jaque Música / aulas de canto".
+-- ============================================================
+alter table public.profiles add column if not exists tagline text not null default 'Gestão de aulas';
+

@@ -5,6 +5,7 @@ import { store } from '../utils/store.js';
 import { ICONS } from '../utils/icons.js';
 import { todayStr, fmtD, fmtMoney, initials, addDays, startOfWeek, parseD, MONTHS } from '../utils/dom.js';
 import { studentById, lessonsEndingPackages, pendingPayments } from '../utils/domain.js';
+import { viewBookingLinkCard } from './disponibilidade.js';
 
 export function viewDashboard(){
   const { lessons, packages } = store;
@@ -32,6 +33,7 @@ export function viewDashboard(){
       <div><h1>Boa, ${nome}</h1><p class="page-sub">${fmtD(today)} · aqui está o resumo do seu estúdio</p></div>
       <button class="btn btn-primary" data-action="open-add-lesson"><span style="display:flex">${ICONS.plus}</span> Nova aula</button>
     </div>
+    ${viewBookingLinkCard()}
     <div class="grid grid-dash">
 
       <div class="card" style="grid-column:span 7;">

@@ -3,6 +3,7 @@
 // ============================================================
 import { store } from '../utils/store.js';
 import { ICONS } from '../utils/icons.js';
+import { escapeHtml } from '../utils/dom.js';
 import { viewDashboard } from '../pages/dashboard.js';
 import { viewAgenda } from '../pages/agenda.js';
 import { viewAlunos } from '../pages/alunos.js';
@@ -10,6 +11,7 @@ import { viewStudentDetail } from '../pages/studentDetail.js';
 import { viewFinanceiro } from '../pages/financeiro.js';
 import { viewDisponibilidade } from '../pages/disponibilidade.js';
 import { viewAssinatura } from '../pages/assinatura.js';
+import { viewPerfil } from '../pages/perfil.js';
 
 export function render(){
   renderSidebar();
@@ -29,18 +31,23 @@ function renderSidebar(){
     {v:'disponibilidade', label:'Disponibilidade', icon:ICONS.clock},
     {v:'financeiro', label:'Financeiro', icon:ICONS.money},
     {v:'assinatura', label:'Assinatura', icon:ICONS.card},
+    {v:'perfil', label:'Perfil', icon:ICONS.edit},
   ];
   const active = store.state.view==='studentDetail' ? 'alunos' : store.state.view;
-  const profileName = store.profile?.name || '';
+  const profileName = store.profile?.name || 'Professor(a)';
+  const tagline = store.profile?.tagline || 'Gestão de aulas';
+  const initial = profileName.trim()[0]?.toUpperCase() || 'P';
   const sidebarEl = document.getElementById('sidebar');
   sidebarEl.style.display = '';
   sidebarEl.innerHTML = `
-    <div class="brand"><div class="brand-mark">J</div><div class="brand-text"><div class="t1">Jaque Música</div><div class="t2">aulas de canto</div></div></div>
+    <div class="brand" style="cursor:pointer;" data-action="nav" data-view="perfil" title="Editar perfil">
+      <div class="brand-mark">${initial}</div>
+      <div class="brand-text"><div class="t1">${escapeHtml(profileName)}</div><div class="t2">${escapeHtml(tagline)}</div></div>
+    </div>
     <div class="nav">
       ${items.map(it=>`<button class="nav-item ${active===it.v?'active':''}" data-action="nav" data-view="${it.v}">${it.icon}<span>${it.label}</span></button>`).join('')}
     </div>
     <div class="sidebar-foot">
-      ${profileName?`<div style="color:rgba(255,255,255,0.75);font-weight:600;margin-bottom:8px;">${profileName}</div>`:''}
       <button class="nav-item" data-action="logout" style="padding:8px 12px;">${ICONS.logout}<span>Sair</span></button>
     </div>
   `;
@@ -55,6 +62,7 @@ function renderView(){
     case 'financeiro': return viewFinanceiro();
     case 'disponibilidade': return viewDisponibilidade();
     case 'assinatura': return viewAssinatura();
+    case 'perfil': return viewPerfil();
     default: return '';
   }
 }

@@ -10,7 +10,7 @@ import { corsHeaders } from '../_shared/cors.ts';
 import { asaasFetch } from '../_shared/asaas.ts';
 import { supabaseAdmin, getRequestUser } from '../_shared/supabaseAdmin.ts';
 
-const PLAN_VALUE = Number(Deno.env.get('ASAAS_PLAN_VALUE') ?? '49.90');
+const PLAN_VALUE = Number(Deno.env.get('ASAAS_PLAN_VALUE') ?? '19.90');
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });

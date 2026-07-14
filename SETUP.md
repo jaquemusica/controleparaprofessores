@@ -85,7 +85,7 @@ site (que roda no navegador do aluno/professor). Ela mora nas
    ```
    supabase secrets set ASAAS_API_KEY=sua_chave_aqui
    supabase secrets set ASAAS_BASE_URL=https://sandbox.asaas.com/api/v3
-   supabase secrets set ASAAS_PLAN_VALUE=49.90
+   supabase secrets set ASAAS_PLAN_VALUE=19.90
    supabase secrets set ASAAS_WEBHOOK_TOKEN=escolha-um-token-secreto-qualquer
    ```
    - Use `ASAAS_BASE_URL=https://sandbox.asaas.com/api/v3` para testar
