@@ -3,10 +3,10 @@
 // ============================================================
 import { db } from '../config/supabase.js';
 
-export async function signUp({ name, email, password }){
+export async function signUp({ name, email, password, cpfCnpj }){
   return db.auth.signUp({
     email, password,
-    options: { data: { name } },
+    options: { data: { name, cpf_cnpj: cpfCnpj } },
   });
 }
 export async function signIn({ email, password }){
