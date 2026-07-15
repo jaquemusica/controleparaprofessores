@@ -90,10 +90,11 @@ document.body.addEventListener('input',(e)=>{
 async function handlePerfilSubmit(){
   const name = document.getElementById('pf_name').value.trim();
   const tagline = document.getElementById('pf_tagline').value.trim();
-  if(!name || !tagline) return;
+  const cpfCnpj = document.getElementById('pf_cpf_cnpj').value.replace(/\D/g,'');
+  if(!name || !tagline || !cpfCnpj) return;
   try{
-    await updateProfile(store.session.user.id, { name, tagline });
-    store.profile = { ...store.profile, name, tagline };
+    await updateProfile(store.session.user.id, { name, tagline, cpfCnpj });
+    store.profile = { ...store.profile, name, tagline, cpfCnpj };
     render();
     showToast('Perfil atualizado.');
   }catch(e){
