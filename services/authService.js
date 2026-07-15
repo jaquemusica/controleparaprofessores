@@ -29,10 +29,10 @@ export async function getSession(){
 export async function getProfile(userId){
   const { data, error } = await db.from('profiles').select('*').eq('id', userId).single();
   if(error) throw error;
-  return { id: data.id, name: data.name, email: data.email, slug: data.slug, tagline: data.tagline };
+  return { id: data.id, name: data.name, email: data.email, slug: data.slug, tagline: data.tagline, cpfCnpj: data.cpf_cnpj };
 }
-export async function updateProfile(userId, { name, tagline }){
-  const { error } = await db.from('profiles').update({ name, tagline }).eq('id', userId);
+export async function updateProfile(userId, { name, tagline, cpfCnpj }){
+  const { error } = await db.from('profiles').update({ name, tagline, cpf_cnpj: cpfCnpj }).eq('id', userId);
   if(error) throw error;
 }
 export function onAuthStateChange(cb){
