@@ -83,8 +83,8 @@ export function openPackageModal(studentId, editId){
           </select>
         </div>
         <div class="field-row" id="p_row_total">
-          <div class="field"><label>Qtd. de aulas *</label><input id="p_total" type="number" min="1" value="${editing?editing.totalLessons:4}" required></div>
-          <div class="field"><label>Aulas / semana</label><input id="p_perweek" type="number" min="1" max="7" value="1" data-action="package-plantype-change"></div>
+          <div class="field" id="p_field_total"><label>Qtd. de aulas *</label><input id="p_total" type="number" min="1" value="${editing?editing.totalLessons:4}" required></div>
+          <div class="field" id="p_field_perweek"><label>Aulas / semana</label><input id="p_perweek" type="number" min="1" max="7" value="${editing?.perWeek||1}" data-action="package-plantype-change"></div>
         </div>
         <div class="field-row">
           <div class="field"><label id="p_value_label">Valor (R$) *</label><input id="p_value" type="number" min="0" step="0.01" placeholder="0,00" value="${editing?editing.value:''}" required></div>
@@ -119,24 +119,25 @@ export function openPackageModal(studentId, editId){
 function refreshPackagePlanFields(){
   const type=document.getElementById('p_plantype')?.value; if(!type) return;
   const rowTotal=document.getElementById('p_row_total');
+  const fieldTotal=document.getElementById('p_field_total');
+  const fieldPerweek=document.getElementById('p_field_perweek');
   const totalInput=document.getElementById('p_total');
-  const perweekInput=document.getElementById('p_perweek');
   const valueLabel=document.getElementById('p_value_label');
   const hint=document.getElementById('p_hint');
+  rowTotal.style.display='flex';
   if(type==='avulsa'){
-    rowTotal.style.display='none'; totalInput.value=1; totalInput.required=false;
+    fieldTotal.style.display='none'; fieldPerweek.style.display='none';
+    totalInput.value=1; totalInput.required=false;
     valueLabel.textContent='Valor da aula (R$) *';
     hint.textContent='Será agendada 1 aula, na data de início escolhida.';
   } else if(type==='pacote'){
-    rowTotal.style.display='flex'; totalInput.required=true;
+    fieldTotal.style.display=''; fieldPerweek.style.display=''; totalInput.required=true;
     valueLabel.textContent='Valor do pacote (R$) *';
     hint.textContent='As aulas serão distribuídas semanalmente, no dia e horário escolhidos, a partir da data de início.';
   } else if(type==='mensalidade'){
-    rowTotal.style.display='flex'; totalInput.required=false;
+    fieldTotal.style.display='none'; fieldPerweek.style.display=''; totalInput.required=false;
     valueLabel.textContent='Valor da mensalidade (R$) *';
-    const perweek=Number(perweekInput.value)||1;
-    totalInput.value=perweek*4;
-    hint.textContent='Serão geradas as aulas de 4 semanas (renove o pacote no mês seguinte).';
+    hint.textContent='É recorrente: agenda automaticamente 1 ano de aulas, no dia/horário e frequência semanal escolhidos. Se o aluno sair, use "Cancelar matrícula" — os dados ficam guardados, sem perder o histórico.';
   }
 }
 function weeklyDatesFrom(startDate, weekday, count, perWeek){
@@ -162,7 +163,7 @@ async function handlePackageSubmit(editId){
   const time=document.getElementById('p_time').value;
   const startDate=document.getElementById('p_start').value;
   const perWeek=Number(document.getElementById('p_perweek').value)||1;
-  let totalLessons = planType==='avulsa' ? 1 : (Number(document.getElementById('p_total').value)||1);
+  const totalLessons = planType==='avulsa' ? 1 : planType==='mensalidade' ? perWeek*52 : (Number(document.getElementById('p_total').value)||1);
 
   if(editId){
     const pkg=packageById(editId); if(!pkg) return;
@@ -171,7 +172,7 @@ async function handlePackageSubmit(editId){
       paymentMethod:document.getElementById('p_method').value,
       purchaseDate,
       paid, paidDate: paid?purchaseDate:null,
-      planType, weekday, time, startDate,
+      planType, weekday, time, startDate, perWeek,
     });
     await dbUpdatePackage(pkg);
     closeModal(); render();
@@ -187,7 +188,7 @@ async function handlePackageSubmit(editId){
     value:Number(document.getElementById('p_value').value)||0,
     paymentMethod:document.getElementById('p_method').value,
     paid, paidDate: paid?purchaseDate:null,
-    planType, weekday, time, startDate,
+    planType, weekday, time, startDate, perWeek, status:'ativo',
   };
   store.packages.push(pkg);
   await dbInsertPackage(pkg);
@@ -209,6 +210,17 @@ export function deletePackage(id){
   store.packages = store.packages.filter(p=>p.id!==id);
   store.lessons.forEach(l=>{ if(l.packageId===id) l.packageId=null; });
   dbDeletePackage(id).then(()=>{ render(); showToast('Pacote excluído.'); });
+}
+export function cancelPackage(id){
+  const p=packageById(id); if(!p) return;
+  if(!confirm('Cancelar esta matrícula? As aulas futuras ainda não realizadas serão canceladas, mas o histórico e os dados do aluno continuam salvos — dá para reativar criando um novo pacote depois.')) return;
+  p.status='cancelado';
+  const today=todayStr();
+  const futureLessons = store.lessons.filter(l=>l.packageId===id && l.status==='agendada' && l.date>=today);
+  futureLessons.forEach(l=>{ l.status='cancelada'; });
+  Promise.all([dbUpdatePackage(p), ...futureLessons.map(l=>dbUpdateLesson(l))]).then(()=>{
+    render(); showToast('Matrícula cancelada.');
+  });
 }
 export function markPaid(id){
   const p=packageById(id); if(!p) return;

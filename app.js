@@ -9,7 +9,7 @@ import { todayStr, startOfWeek, addDays, escapeHtml } from './utils/dom.js';
 import { getSession, getProfile, updateProfile, onAuthStateChange, signOut } from './services/authService.js';
 import {
   openStudentModal, deleteStudent,
-  openPackageModal, deletePackage, markPaid,
+  openPackageModal, deletePackage, cancelPackage, markPaid,
   openLessonModal, deleteLesson, setLessonStatus,
   copyRenewMsg, copyPaymentMsg,
   closeModal, handleModalSubmit, handleModalChange,
@@ -39,6 +39,7 @@ document.body.addEventListener('click', (e)=>{
   else if(a==='open-add-package') openPackageModal(t.dataset.student||store.state.selectedStudentId);
   else if(a==='edit-package') openPackageModal(null, t.dataset.id);
   else if(a==='delete-package') deletePackage(t.dataset.id);
+  else if(a==='cancel-package') cancelPackage(t.dataset.id);
   else if(a==='mark-paid') markPaid(t.dataset.id);
   else if(a==='open-add-lesson') openLessonModal(store.state.selectedStudentId);
   else if(a==='delete-lesson') deleteLesson(t.dataset.id);

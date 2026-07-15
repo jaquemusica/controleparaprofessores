@@ -12,10 +12,13 @@ export function lessonsDoneForPackage(pkgId){ return store.lessons.filter(l=>l.p
 export function pkgRemaining(p){ return Math.max(0, p.totalLessons - lessonsDoneForPackage(p.id)); }
 export function planLabel(p){
   if(p.planType==='avulsa') return 'Aula avulsa';
-  if(p.planType==='mensalidade') return `Mensalidade (${p.totalLessons} aulas/mês)`;
+  if(p.planType==='mensalidade') return `Mensalidade (${p.perWeek||1}x/semana)`;
   return `Pacote de ${p.totalLessons} aulas`;
 }
-export function pkgStatus(p){ return pkgRemaining(p)<=0 ? 'finalizado' : 'andamento'; }
+export function pkgStatus(p){
+  if(p.status==='cancelado') return 'cancelado';
+  return pkgRemaining(p)<=0 ? 'finalizado' : 'andamento';
+}
 export function activePackagesForStudent(id){ return store.packages.filter(p=>p.studentId===id && pkgStatus(p)==='andamento').sort((a,b)=>parseD(b.purchaseDate)-parseD(a.purchaseDate)); }
 export function packagesForStudent(id){ return store.packages.filter(p=>p.studentId===id).sort((a,b)=>parseD(b.purchaseDate)-parseD(a.purchaseDate)); }
 export function lessonsForStudent(id){ return store.lessons.filter(l=>l.studentId===id).sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time)); }

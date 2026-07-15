@@ -26,11 +26,14 @@ export function viewStudentDetail(){
           const isLast = !filled && i===done && remaining===1;
           return `<i class="${filled?'done':''} ${isLast?'last':''}"></i>`;
         }).join('');
+        const statusLabel = status==='andamento'?'Em andamento':status==='cancelado'?'Cancelado':'Finalizado';
+        const statusBadge = status==='andamento'?'badge-info':status==='cancelado'?'badge-danger':'badge-neutral';
         return `<div class="card" style="margin-bottom:14px;">
           <div class="card-title">
-            <h3>${planLabel(p)} <span class="badge ${status==='andamento'?'badge-info':'badge-neutral'}" style="margin-left:8px;">${status==='andamento'?'Em andamento':'Finalizado'}</span></h3>
+            <h3>${planLabel(p)} <span class="badge ${statusBadge}" style="margin-left:8px;">${statusLabel}</span></h3>
             <div style="display:flex;gap:6px;">
               <button class="btn btn-ghost btn-icon" title="Editar pacote" data-action="edit-package" data-id="${p.id}">${ICONS.edit}</button>
+              ${status!=='cancelado'?`<button class="btn btn-ghost btn-icon" title="Cancelar matrícula" data-action="cancel-package" data-id="${p.id}">${ICONS.trash}</button>`:''}
               <button class="btn btn-ghost btn-icon" title="Excluir pacote" data-action="delete-package" data-id="${p.id}">${ICONS.trash}</button>
             </div>
           </div>

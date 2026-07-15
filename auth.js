@@ -41,7 +41,7 @@ document.getElementById('form-login').addEventListener('submit', async (e)=>{
 document.getElementById('form-signup').addEventListener('submit', async (e)=>{
   e.preventDefault();
   hideMsg();
-    const name = document.getElementById('signup-name').value.trim();
+  const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
   const cpfCnpj = document.getElementById('signup-cpf-cnpj').value.replace(/\D/g,'');

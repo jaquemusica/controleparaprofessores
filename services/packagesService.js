@@ -8,12 +8,14 @@ import { showToast } from '../utils/toast.js';
 function packageToRow(p){
   return { id:p.id, user_id:store.session?.user?.id, student_id:p.studentId, total_lessons:p.totalLessons, purchase_date:p.purchaseDate, value:p.value,
     payment_method:p.paymentMethod, paid:p.paid, paid_date:p.paidDate||null, plan_type:p.planType||'pacote',
-    weekday:(p.weekday===undefined||p.weekday===null)?null:p.weekday, time:p.time||null, start_date:p.startDate||null };
+    weekday:(p.weekday===undefined||p.weekday===null)?null:p.weekday, time:p.time||null, start_date:p.startDate||null,
+    status:p.status||'ativo', per_week:p.perWeek||null };
 }
 function rowToPackage(r){
   return { id:r.id, studentId:r.student_id, totalLessons:r.total_lessons, purchaseDate:r.purchase_date, value:Number(r.value),
     paymentMethod:r.payment_method, paid:r.paid, paidDate:r.paid_date, planType:r.plan_type||'pacote',
-    weekday:(r.weekday===null||r.weekday===undefined)?null:Number(r.weekday), time:r.time, startDate:r.start_date };
+    weekday:(r.weekday===null||r.weekday===undefined)?null:Number(r.weekday), time:r.time, startDate:r.start_date,
+    status:r.status||'ativo', perWeek:r.per_week?Number(r.per_week):null };
 }
 
 function handleDbError(error){

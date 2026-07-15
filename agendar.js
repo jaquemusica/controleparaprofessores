@@ -4,7 +4,7 @@
 // ============================================================
 import { getPublicProfessor, getAvailableSlotsPublic, createBookingRequestPublic } from './services/bookingService.js';
 import { showToast } from './utils/toast.js';
-import { todayStr, fmtD, addDays, escapeHtml } from './utils/dom.js';
+import { todayStr, fmtD, addDays, escapeHtml, DOWS, parseD } from './utils/dom.js';
 
 const headerEl = document.getElementById('booking-header');
 const contentEl = document.getElementById('booking-content');
@@ -29,17 +29,9 @@ function renderBookingUI(professor){
     <h1>${escapeHtml(professor.name)}</h1>
     <p>Escolha um horário disponível para solicitar sua aula.</p>
   `;
-  const min = todayStr();
-  const max = addDays(min, 60);
   contentEl.innerHTML = `
-    <div class="card" style="margin-bottom:16px;">
-      <div class="field" style="margin-bottom:0;">
-        <label>Data</label>
-        <input type="date" id="b_date" min="${min}" max="${max}" value="${min}">
-      </div>
-    </div>
     <div class="card" id="b_slots_card" style="margin-bottom:16px;">
-      <div class="card-title"><h3>Horários livres</h3></div>
+      <div class="card-title"><h3>Horários disponíveis</h3></div>
       <div id="b_slots"></div>
     </div>
     <div class="card booking-step" id="b_form_card">
@@ -57,37 +49,52 @@ function renderBookingUI(professor){
     </div>
   `;
 
-  document.getElementById('b_date').addEventListener('change', (e)=>{
-    selectedDate = e.target.value;
-    loadSlots(professor.slug, selectedDate);
-  });
   document.getElementById('b_form').addEventListener('submit', async (e)=>{
     e.preventDefault();
     await submitRequest(professor.slug);
   });
 
-  selectedDate = min;
-  loadSlots(professor.slug, selectedDate);
+  loadSlots(professor.slug);
 }
 
-async function loadSlots(slug, date){
+async function loadSlots(slug){
   const box = document.getElementById('b_slots');
   box.innerHTML = `<div class="empty">Carregando horários...</div>`;
   document.getElementById('b_form_card').classList.remove('active');
+  selectedDate = null;
   selectedTime = null;
   try{
-    const slots = await getAvailableSlotsPublic(slug, date, date);
+    const from = todayStr();
+    const to = addDays(from, 60);
+    const slots = await getAvailableSlotsPublic(slug, from, to);
     if(slots.length===0){
-      box.innerHTML = `<div class="empty">Nenhum horário livre neste dia. Tente outra data.</div>`;
+      box.innerHTML = `<div class="empty">Nenhum horário livre nos próximos dias. Fale diretamente com o professor.</div>`;
       return;
     }
-    box.innerHTML = `<div class="slots-grid">${slots.map(s=>`<button type="button" class="slot-btn" data-time="${s.time}">${s.time}</button>`).join('')}</div>`;
+    const byDate = new Map();
+    slots.forEach(s=>{
+      if(!byDate.has(s.date)) byDate.set(s.date, []);
+      byDate.get(s.date).push(s.time);
+    });
+    const groups = [...byDate.entries()].slice(0, 20);
+    box.innerHTML = groups.map(([date, times])=>{
+      const weekday = DOWS[(parseD(date).getDay()+6)%7];
+      return `
+        <div class="booking-day-group">
+          <div class="booking-day-label">${weekday}, ${fmtD(date)}</div>
+          <div class="slots-grid">
+            ${times.map(t=>`<button type="button" class="slot-btn" data-date="${date}" data-time="${t}">${t}</button>`).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
     box.querySelectorAll('.slot-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         box.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
+        selectedDate = btn.dataset.date;
         selectedTime = btn.dataset.time;
-        document.getElementById('b_selected_info').textContent = `${fmtD(date)} às ${selectedTime}`;
+        document.getElementById('b_selected_info').textContent = `${DOWS[(parseD(selectedDate).getDay()+6)%7]}, ${fmtD(selectedDate)} às ${selectedTime}`;
         document.getElementById('b_form_card').classList.add('active');
         document.getElementById('b_form_card').scrollIntoView({ behavior:'smooth', block:'start' });
       });
@@ -116,7 +123,7 @@ async function submitRequest(slug){
     console.error(err);
     showToast(err.message || 'Não foi possível enviar a solicitação. Tente outro horário.');
     btn.disabled = false; btn.textContent = 'Solicitar aula';
-    loadSlots(slug, selectedDate); // horário pode ter sido ocupado nesse meio tempo
+    loadSlots(slug); // horário pode ter sido ocupado nesse meio tempo
   }
 }
 
