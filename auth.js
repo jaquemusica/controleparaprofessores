@@ -41,10 +41,11 @@ document.getElementById('form-login').addEventListener('submit', async (e)=>{
 document.getElementById('form-signup').addEventListener('submit', async (e)=>{
   e.preventDefault();
   hideMsg();
-  const name = document.getElementById('signup-name').value.trim();
+    const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
-  const { error } = await signUp({ name, email, password });
+  const cpfCnpj = document.getElementById('signup-cpf-cnpj').value.replace(/\D/g,'');
+  const { error } = await signUp({ name, email, password, cpfCnpj });
   if(error){ showMsg(translateError(error), 'error'); return; }
   showMsg('Conta criada! Verifique seu e-mail para confirmar o cadastro antes de entrar.', 'success');
   document.getElementById('form-signup').reset();
