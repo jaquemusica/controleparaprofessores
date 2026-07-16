@@ -71,19 +71,23 @@ async function loadSlots(slug){
       box.innerHTML = `<div class="empty">Nenhum horário livre nos próximos dias. Fale diretamente com o professor.</div>`;
       return;
     }
-    const byDate = new Map();
+    // Agrupa por dia da semana + horário, guardando a data mais próxima
+    // de cada combinação (é essa data que vira a solicitação real).
+    const byWeekday = new Map(); // weekday -> Map(time -> earliest date)
     slots.forEach(s=>{
-      if(!byDate.has(s.date)) byDate.set(s.date, []);
-      byDate.get(s.date).push(s.time);
+      const weekday = (parseD(s.date).getDay()+6)%7;
+      if(!byWeekday.has(weekday)) byWeekday.set(weekday, new Map());
+      const times = byWeekday.get(weekday);
+      if(!times.has(s.time) || s.date < times.get(s.time)) times.set(s.time, s.date);
     });
-    const groups = [...byDate.entries()].slice(0, 20);
-    box.innerHTML = groups.map(([date, times])=>{
-      const weekday = DOWS[(parseD(date).getDay()+6)%7];
+    const orderedWeekdays = [...byWeekday.keys()].sort((a,b)=>a-b);
+    box.innerHTML = orderedWeekdays.map(weekday=>{
+      const times = [...byWeekday.get(weekday).entries()].sort((a,b)=>a[0].localeCompare(b[0]));
       return `
         <div class="booking-day-group">
-          <div class="booking-day-label">${weekday}, ${fmtD(date)}</div>
+          <div class="booking-day-label">${DOWS[weekday]}</div>
           <div class="slots-grid">
-            ${times.map(t=>`<button type="button" class="slot-btn" data-date="${date}" data-time="${t}">${t}</button>`).join('')}
+            ${times.map(([time,date])=>`<button type="button" class="slot-btn" data-date="${date}" data-time="${time}">${time}</button>`).join('')}
           </div>
         </div>
       `;
