@@ -206,10 +206,16 @@ async function handlePackageSubmit(editId){
   showToast(created>0?`Pacote criado e ${created} aula(s) distribuída(s) na agenda.`:'Pacote criado.');
 }
 export function deletePackage(id){
-  if(!confirm('Excluir este pacote? As aulas vinculadas a ele permanecerão registradas, mas perderão o vínculo.')) return;
+  const linkedLessons = store.lessons.filter(l=>l.packageId===id);
+  const msg = linkedLessons.length>0
+    ? `Excluir este pacote e as ${linkedLessons.length} aula(s) vinculada(s) a ele? Isso não pode ser desfeito. Se quiser manter o histórico de aulas, use "Cancelar matrícula" em vez de excluir.`
+    : 'Excluir este pacote?';
+  if(!confirm(msg)) return;
   store.packages = store.packages.filter(p=>p.id!==id);
-  store.lessons.forEach(l=>{ if(l.packageId===id) l.packageId=null; });
-  dbDeletePackage(id).then(()=>{ render(); showToast('Pacote excluído.'); });
+  store.lessons = store.lessons.filter(l=>l.packageId!==id);
+  Promise.all([dbDeletePackage(id), ...linkedLessons.map(l=>dbDeleteLesson(l.id))]).then(()=>{
+    render(); showToast('Pacote excluído.');
+  });
 }
 export function cancelPackage(id){
   const p=packageById(id); if(!p) return;

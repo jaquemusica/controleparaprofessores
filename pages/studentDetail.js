@@ -33,8 +33,8 @@ export function viewStudentDetail(){
             <h3>${planLabel(p)} <span class="badge ${statusBadge}" style="margin-left:8px;">${statusLabel}</span></h3>
             <div style="display:flex;gap:6px;">
               <button class="btn btn-ghost btn-icon" title="Editar pacote" data-action="edit-package" data-id="${p.id}">${ICONS.edit}</button>
-              ${status!=='cancelado'?`<button class="btn btn-ghost btn-icon" title="Cancelar matrícula" data-action="cancel-package" data-id="${p.id}">${ICONS.trash}</button>`:''}
-              <button class="btn btn-ghost btn-icon" title="Excluir pacote" data-action="delete-package" data-id="${p.id}">${ICONS.trash}</button>
+              ${status!=='cancelado'?`<button class="btn btn-ghost btn-icon" title="Cancelar matrícula (mantém histórico)" data-action="cancel-package" data-id="${p.id}">${ICONS.x}</button>`:''}
+              <button class="btn btn-ghost btn-icon" title="Excluir pacote e todas as aulas" data-action="delete-package" data-id="${p.id}">${ICONS.trash}</button>
             </div>
           </div>
           <div class="eq" style="margin-bottom:10px;">${segs}</div>
